@@ -1,0 +1,35 @@
+#!/bin/sh
+
+echo "pre-push: kiểm tra TECH-01, TECH-02, TECH-05..."
+fail=0
+
+if grep -rnE '\.then\(' src; then
+  echo "✖ TECH-02: còn .then() — dùng async/await + try/catch"
+  fail=1
+fi
+if grep -rnE 'useEffect\([[:space:]]*async' src; then
+  echo "✖ TECH-02: callback của useEffect không được là async"
+  fail=1
+fi
+if grep -rlE "from ['\"]axios['\"]" src | grep -v '^src/api/'; then
+  echo "✖ TECH-01: chỉ src/api được import axios"
+  fail=1
+fi
+if grep -rn 'localhost:3001' src; then
+  echo "✖ TECH-01: URL API viết cứng — dùng import.meta.env.VITE_API_URL"
+  fail=1
+fi
+if grep -rnE '(^|[^.A-Za-z_])(alert|confirm)\(|window\.(alert|confirm)\(' src; then
+  echo "✖ TECH-05: dùng Toast / ConfirmModal thay cho alert / confirm"
+  fail=1
+fi
+if [ "$fail" -ne 0 ]; then
+  echo "Push bị huỷ — sửa các lỗi ở trên"
+  exit 1
+fi
+
+echo "pre-push: npm run build..."
+npm run build --silent || {
+  echo "Build FAILED - push bị huỷ"
+  exit 1
+}

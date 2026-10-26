@@ -4,25 +4,25 @@
 # A — repository, configuration, core API, routing, hooks
 /.github/                               @hoangmefo
 /.githooks/                             @hoangmefo
-/package.json                           @hoangmefo
-/src/App.jsx                            @hoangmefo
-/src/api/axiosClient.js                 @hoangmefo
-/src/hooks/                             @hoangmefo
+/laptop-store/package.json              @hoangmefo
+/laptop-store/src/App.jsx               @hoangmefo
+/laptop-store/src/api/axiosClient.js    @hoangmefo
+/laptop-store/src/hooks/                @hoangmefo
 **/*Auth*                               @hoangmefo
-/src/pages/admin/AdminLaptopPage.jsx    @hoangmefo
+/laptop-store/src/pages/admin/AdminLaptopPage.jsx @hoangmefo
 
 # B — catalog
-/src/utils/                             @nguyenminhnhat
-/src/components/common/                 @nguyenminhnhat
-/src/components/laptop/                 @nguyenminhnhat
-/src/api/laptopApi.js                   @nguyenminhnhat
-/src/api/catalogApi.js                  @nguyenminhnhat
+/laptop-store/src/utils/                @nguyenminhnhat
+/laptop-store/src/components/common/    @nguyenminhnhat
+/laptop-store/src/components/laptop/    @nguyenminhnhat
+/laptop-store/src/api/laptopApi.js      @nguyenminhnhat
+/laptop-store/src/api/catalogApi.js     @nguyenminhnhat
 **/*Review*                              @nguyenminhnhat
 **/*Home*                                @nguyenminhnhat
 **/*LaptopList*                          @nguyenminhnhat
 **/*LaptopDetail*                       @nguyenminhnhat
 **/*Navbar*                              @nguyenminhnhat
 **/*Footer*                              @nguyenminhnhat
-/README.md                               @nguyenminhnhat
+/laptop-store/README.md                  @nguyenminhnhat
 
 # The team has no separate C member; remaining paths use the default owner A.

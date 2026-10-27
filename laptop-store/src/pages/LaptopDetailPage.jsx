@@ -20,8 +20,11 @@ import Loading from '../components/common/Loading'
 import Price from '../components/common/Price'
 import StarRating from '../components/common/StarRating'
 import LaptopGrid from '../components/laptop/LaptopGrid'
+import ReviewForm from '../components/laptop/ReviewForm'
+import ReviewList from '../components/laptop/ReviewList'
+import { useAuth } from '../contexts/AuthContext'
+import { useToast } from '../contexts/ToastContext'
 import useAddToCart from '../hooks/useAddToCart'
-import { formatDate } from '../utils/format'
 import { FALLBACK_IMAGE, handleImageError } from '../utils/image'
 import NotFoundPage from './NotFoundPage'
 
@@ -71,15 +74,23 @@ export default function LaptopDetailPage() {
 
 function LaptopDetail({ id }) {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { showToast } = useToast()
   const { add, adding } = useAddToCart()
   const [result, setResult] = useState(null)
   const [retry, setRetry] = useState(0)
   const [notFound, setNotFound] = useState(false)
+  const [reviewAccess, setReviewAccess] = useState(null)
   const data = result?.id === id && result.retry === retry ? result.data : null
   const error =
     result?.id === id && result.retry === retry ? result.error : null
   const loading = !data && !error && !notFound
   const laptop = data?.laptop
+  const reviewAccessMatchesUser =
+    reviewAccess?.user === user &&
+    reviewAccess?.laptopId === String(laptop?.id) &&
+    reviewAccess?.userId === String(user?.id)
+  const currentReviewAccess = reviewAccessMatchesUser ? reviewAccess : null
 
   useEffect(() => {
     const controller = new AbortController()
@@ -112,8 +123,79 @@ function LaptopDetail({ id }) {
   }, [id, retry])
 
   useEffect(() => {
+    if (!user?.id || !laptop?.id) {
+      return
+    }
+
+    const controller = new AbortController()
+    const access = {
+      laptopId: String(laptop.id),
+      userId: String(user.id),
+      user,
+    }
+
+    laptopDetailApi
+      .getUserReviews(laptop.id, user.id, controller.signal)
+      .then((reviews) => {
+        if (controller.signal.aborted) return
+        const alreadyReviewed = reviews.length > 0
+        setReviewAccess({
+          ...access,
+          status: alreadyReviewed ? 'already-reviewed' : 'eligible',
+        })
+      })
+      .catch((reviewError) => {
+        if (!controller.signal.aborted) {
+          setReviewAccess({ ...access, status: 'error', error: reviewError })
+        }
+      })
+
+    return () => controller.abort()
+  }, [laptop?.id, user])
+
+  useEffect(() => {
     document.title = laptop ? `${laptop.name} | LaptopStore` : 'Chi tiết laptop'
   }, [laptop])
+
+  function setData(update) {
+    setResult((current) => {
+      if (
+        current?.id !== id ||
+        current.retry !== retry ||
+        !current.data
+      ) {
+        return current
+      }
+
+      return {
+        ...current,
+        data: update(current.data),
+      }
+    })
+  }
+
+  async function submitReview({ rating, comment }) {
+    const review = await laptopDetailApi.addReview({
+      laptopId: laptop.id,
+      userId: user.id,
+      userName: user.name || user.username || user.email || 'Khách hàng',
+      rating,
+      comment,
+      createdAt: new Date().toISOString(),
+    })
+
+    setData((currentData) => ({
+      ...currentData,
+      reviews: [review, ...currentData.reviews],
+    }))
+    setReviewAccess({
+      laptopId: String(laptop.id),
+      userId: String(user.id),
+      user,
+      status: 'already-reviewed',
+    })
+    showToast('Đánh giá của bạn đã được gửi.', 'success')
+  }
 
   if (notFound) {
     return <NotFoundPage />
@@ -263,26 +345,33 @@ function LaptopDetail({ id }) {
         </Tab>
         <Tab eventKey="reviews" title={`Đánh giá (${data.reviews.length})`}>
           {data.reviewsError ? (
-            <Alert variant="warning">
-              Không tải được đánh giá
-            </Alert>
-          ) : data.reviews.length === 0 ? (
-            <p className="text-secondary py-3">Chưa có đánh giá.</p>
+            <Alert variant="warning">Không tải được đánh giá.</Alert>
           ) : (
-            <div className="list-group list-group-flush">
-              {data.reviews.map((review) => (
-                <div className="list-group-item px-0" key={review.id}>
-                  <strong>{review.userName ?? 'Khách hàng'}</strong>{' '}
-                  <small className="text-secondary">
-                    {formatDate(review.createdAt)}
-                  </small>
-                  <div>
-                    <StarRating value={review.rating} showValue={false} />
-                  </div>
-                  <p className="mb-0">{review.comment}</p>
-                </div>
-              ))}
-            </div>
+            <ReviewList reviews={data.reviews} />
+          )}
+          {!user ? (
+            <Alert variant="info" className="mt-4">
+              Đăng nhập để viết đánh giá.
+            </Alert>
+          ) : !user.id ? (
+            <Alert variant="warning" className="mt-4">
+              Không xác định được tài khoản để gửi đánh giá.
+            </Alert>
+          ) : !currentReviewAccess ? (
+            <p className="text-secondary mt-4" role="status">
+              Đang kiểm tra quyền đánh giá...
+            </p>
+          ) : currentReviewAccess.status === 'error' ? (
+            <Alert variant="danger" className="mt-4">
+              {currentReviewAccess.error?.message ||
+                'Không thể kiểm tra trạng thái đánh giá.'}
+            </Alert>
+          ) : currentReviewAccess.status === 'already-reviewed' ? (
+            <Alert variant="info" className="mt-4">
+              Bạn đã đánh giá laptop này rồi.
+            </Alert>
+          ) : (
+            <ReviewForm onSubmit={submitReview} />
           )}
         </Tab>
       </Tabs>

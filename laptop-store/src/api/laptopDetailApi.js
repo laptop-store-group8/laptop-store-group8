@@ -43,6 +43,29 @@ const laptopDetailApi = {
     )
   },
 
+  getUserReviews(laptopId, userId, signal) {
+    return getCollection('reviews', { laptopId, userId }, signal)
+  },
+
+  async addReview(review, signal) {
+    const response = await fetch(`${API_BASE_URL}/reviews`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(review),
+      signal,
+    })
+
+    if (!response.ok) {
+      const error = new Error(
+        `Không thể gửi đánh giá (HTTP ${response.status})`,
+      )
+      error.status = response.status
+      throw error
+    }
+
+    return response.json()
+  },
+
   getRelated(laptop, signal) {
     return getCollection(
       'laptops',

@@ -3,12 +3,15 @@ import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
+import AppNavbar from './components/layout/AppNavbar.jsx'
+import Footer from './components/layout/Footer.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+      <AppNavbar />
       <section id="center">
         <div className="hero">
           <img src={heroImg} className="base" width="170" height="179" alt="" />
@@ -115,6 +118,7 @@ function App() {
 
       <div className="ticks"></div>
       <section id="spacer"></section>
+      <Footer />
     </>
   )
 }

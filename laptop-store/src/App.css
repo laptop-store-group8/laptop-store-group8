@@ -186,3 +186,16 @@
 .search-wrapper {
   min-width: 0;
 }
+
+.laptop-card-img {
+  height: 190px;
+  object-fit: cover;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  min-height: 2.5em;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

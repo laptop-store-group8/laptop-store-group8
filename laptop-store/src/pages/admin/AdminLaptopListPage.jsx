@@ -31,9 +31,9 @@ export default function AdminLaptopListPage() {
 
     async function loadLaptops() {
       try {
-        const data = await laptopApi.getAll(controller.signal)
+        const { items } = await laptopApi.getAll({}, controller.signal)
         if (!controller.signal.aborted) {
-          setLaptops(data || [])
+          setLaptops(items)
           setError('')
         }
       } catch (fetchError) {

@@ -62,8 +62,12 @@ function AdminLaptopFormScreen({ id }) {
     setSubmitError('')
 
     try {
+      const laptop = { ...pageData.laptop }
+      delete laptop.brand
+      delete laptop.category
+
       const savedLaptop = isEdit
-        ? await laptopApi.update(id, { ...pageData.laptop, ...payload, id: pageData.laptop.id })
+        ? await laptopApi.update(id, { ...laptop, ...payload, id: laptop.id })
         : await laptopApi.create(payload)
 
       navigate('/admin/laptops', {

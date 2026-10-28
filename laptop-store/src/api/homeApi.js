@@ -1,9 +1,7 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 'http://localhost:3001'
-).replace(/\/$/, '')
+import { getApiUrl } from './apiUrl'
 
 async function getCollection(path, params, signal) {
-  const url = new URL(`${API_BASE_URL}/${path}`)
+  const url = new URL(getApiUrl(path))
   url.search = new URLSearchParams(params).toString()
 
   const response = await fetch(url, { signal })

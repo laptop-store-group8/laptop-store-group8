@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Button, Card, Container, Table } from 'react-bootstrap'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import laptopApi from '../../api/laptopApi'
+import ConfirmModal from '../../components/common/ConfirmModal'
 import ErrorAlert from '../../components/common/ErrorAlert'
 import Loading from '../../components/common/Loading'
 import { useToast } from '../../contexts/ToastContext'
@@ -14,7 +15,8 @@ export default function AdminLaptopListPage() {
   const [laptops, setLaptops] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [deletingId, setDeletingId] = useState(null)
+  const [laptopToDelete, setLaptopToDelete] = useState(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const message = location.state?.message
@@ -27,40 +29,44 @@ export default function AdminLaptopListPage() {
   useEffect(() => {
     const controller = new AbortController()
 
-    laptopApi
-      .getAll(controller.signal)
-      .then((data) => {
+    async function loadLaptops() {
+      try {
+        const data = await laptopApi.getAll(controller.signal)
         if (!controller.signal.aborted) {
           setLaptops(data || [])
           setError('')
         }
-      })
-      .catch((fetchError) => {
+      } catch (fetchError) {
         if (!controller.signal.aborted) {
           setError(fetchError?.message || 'Không thể tải danh sách laptop.')
         }
-      })
-      .finally(() => {
+      } finally {
         if (!controller.signal.aborted) {
           setLoading(false)
         }
-      })
+      }
+    }
+
+    loadLaptops()
 
     return () => controller.abort()
   }, [])
 
-  async function handleDelete(id) {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa laptop này?')) return
+  async function handleDelete() {
+    if (!laptopToDelete) return
 
-    setDeletingId(id)
+    setDeleting(true)
     try {
-      await laptopApi.delete(id)
-      setLaptops((current) => current.filter((item) => item.id !== id))
+      await laptopApi.delete(laptopToDelete.id)
+      setLaptops((current) =>
+        current.filter((item) => item.id !== laptopToDelete.id),
+      )
       showToast('Đã xóa laptop thành công.', 'success')
     } catch (deleteError) {
       showToast(deleteError?.message || 'Không thể xóa laptop.', 'danger')
     } finally {
-      setDeletingId(null)
+      setDeleting(false)
+      setLaptopToDelete(null)
     }
   }
 
@@ -110,7 +116,7 @@ export default function AdminLaptopListPage() {
                     <div className="d-flex justify-content-end gap-2">
                       <Button
                         as={Link}
-                        to={`/admin/laptops/${laptop.id}`}
+                        to={`/admin/laptops/${laptop.id}/edit`}
                         variant="outline-primary"
                         size="sm"
                       >
@@ -119,10 +125,10 @@ export default function AdminLaptopListPage() {
                       <Button
                         variant="outline-danger"
                         size="sm"
-                        onClick={() => handleDelete(laptop.id)}
-                        disabled={deletingId === laptop.id}
+                        onClick={() => setLaptopToDelete(laptop)}
+                        disabled={deleting}
                       >
-                        {deletingId === laptop.id ? 'Đang xóa...' : 'Xóa'}
+                        Xóa
                       </Button>
                     </div>
                   </td>
@@ -132,6 +138,15 @@ export default function AdminLaptopListPage() {
           </tbody>
         </Table>
       </Card>
+      <ConfirmModal
+        show={Boolean(laptopToDelete)}
+        title="Xác nhận xóa laptop"
+        message={`Bạn có chắc chắn muốn xóa "${laptopToDelete?.name}"?`}
+        confirmText="Xóa"
+        loading={deleting}
+        onCancel={() => setLaptopToDelete(null)}
+        onConfirm={handleDelete}
+      />
     </Container>
   )
 }

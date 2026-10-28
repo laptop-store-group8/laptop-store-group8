@@ -1,36 +1,46 @@
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
-import AppNavbar from './components/layout/AppNavbar.jsx'
-import Footer from './components/layout/Footer.jsx'
-import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx'
-import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage.jsx'
-import AdminLaptopListPage from './pages/admin/AdminLaptopListPage.jsx'
-import AdminOrderListPage from './pages/admin/AdminOrderListPage.jsx'
-import HomePage from './pages/HomePage.jsx'
-import LaptopDetailPage from './pages/LaptopDetailPage.jsx'
-import LaptopListPage from './pages/LaptopListPage.jsx'
-import NotFoundPage from './pages/NotFoundPage.jsx'
-import OrderListPage from './pages/OrderListPage.jsx'
+import AdminLayout from './components/layout/AdminLayout'
+import MainLayout from './components/layout/MainLayout'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
+import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage'
+import AdminLaptopListPage from './pages/admin/AdminLaptopListPage'
+import AdminOrderListPage from './pages/admin/AdminOrderListPage'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+import HomePage from './pages/HomePage'
+import LaptopDetailPage from './pages/LaptopDetailPage'
+import LaptopFilterDemoPage from './pages/LaptopFilterDemoPage'
+import LaptopListPage from './pages/LaptopListPage'
+import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
+import OrderListPage from './pages/OrderListPage'
 
-function App() {
+export default function App() {
   return (
-    <>
-      <AppNavbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/laptops" element={<LaptopListPage />} />
-        <Route path="/laptops/:id" element={<LaptopDetailPage />} />
-        <Route path="/orders" element={<OrderListPage />} />
-        <Route path="/admin" element={<AdminDashboardPage />} />
-        <Route path="/admin/laptops" element={<AdminLaptopListPage />} />
-        <Route path="/admin/laptops/new" element={<AdminLaptopFormPage />} />
-        <Route path="/admin/laptops/:id" element={<AdminLaptopFormPage />} />
-        <Route path="/admin/orders" element={<AdminOrderListPage />} />
+    <Routes>
+      <Route element={<MainLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="laptops" element={<LaptopListPage />} />
+        <Route path="laptops/:id" element={<LaptopDetailPage />} />
+        {import.meta.env.DEV && (
+          <Route path="dev/laptop-filter" element={<LaptopFilterDemoPage />} />
+        )}
+        <Route path="login" element={<LoginPage />} />
+        <Route path="cart" element={<CartPage />} />
+        <Route path="checkout" element={<CheckoutPage />} />
+        <Route path="orders" element={<OrderListPage />} />
         <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-      <Footer />
-    </>
-  )
-}
+      </Route>
 
-export default App
+      <Route path="admin" element={<AdminLayout />}>
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="laptops" element={<AdminLaptopListPage />} />
+        <Route path="laptops/new" element={<AdminLaptopFormPage />} />
+        <Route path="laptops/:id" element={<AdminLaptopFormPage />} />
+        <Route path="laptops/:id/edit" element={<AdminLaptopFormPage />} />
+        <Route path="orders" element={<AdminOrderListPage />} />
+      </Route>
+    </Routes>
+  );
+}

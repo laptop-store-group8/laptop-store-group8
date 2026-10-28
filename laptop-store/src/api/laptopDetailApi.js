@@ -1,9 +1,7 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 'http://localhost:3001'
-).replace(/\/$/, '')
+import { getApiUrl } from './apiUrl'
 
 async function getCollection(path, params, signal) {
-  const url = new URL(`${API_BASE_URL}/${path}`)
+  const url = new URL(getApiUrl(path))
   const searchParams = new URLSearchParams()
   Object.entries(params).forEach(([key, value]) => {
     if (Array.isArray(value)) {
@@ -48,7 +46,7 @@ const laptopDetailApi = {
   },
 
   async addReview(review, signal) {
-    const response = await fetch(`${API_BASE_URL}/reviews`, {
+    const response = await fetch(getApiUrl('reviews'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(review),

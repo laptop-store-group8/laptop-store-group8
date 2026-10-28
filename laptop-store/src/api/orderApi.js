@@ -1,9 +1,7 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 'http://localhost:3001'
-).replace(/\/$/, '')
+import { getApiUrl } from './apiUrl'
 
 async function request(path, options = {}) {
-  const response = await fetch(`${API_BASE_URL}/${path}`, options)
+  const response = await fetch(getApiUrl(path), options)
 
   if (!response.ok) {
     throw new Error(`Không thể xử lý đơn hàng (HTTP ${response.status})`)

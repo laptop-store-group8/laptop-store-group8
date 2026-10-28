@@ -40,9 +40,12 @@ export default function AdminOrderListPage() {
   useEffect(() => {
     const controller = new AbortController()
 
-    orderApi
-      .getAll({ _sort: 'createdAt', _order: 'desc' }, controller.signal)
-      .then((data) => {
+    async function loadOrders() {
+      try {
+        const data = await orderApi.getAll(
+          { _sort: 'createdAt', _order: 'desc' },
+          controller.signal,
+        )
         if (!controller.signal.aborted) {
           if (!Array.isArray(data)) {
             throw new Error('Dữ liệu danh sách đơn hàng không hợp lệ.')
@@ -50,10 +53,12 @@ export default function AdminOrderListPage() {
           setOrders(data)
           setError(null)
         }
-      })
-      .catch((fetchError) => {
+      } catch (fetchError) {
         if (!controller.signal.aborted) setError(fetchError)
-      })
+      }
+    }
+
+    loadOrders()
 
     return () => controller.abort()
   }, [])

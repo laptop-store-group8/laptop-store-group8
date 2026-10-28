@@ -1,6 +1,4 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 'http://localhost:3001'
-).replace(/\/$/, '')
+import { getApiUrl } from './apiUrl'
 
 const SORT_OPTIONS = {
   newest: { field: 'createdAt', order: 'desc' },
@@ -29,7 +27,7 @@ export function buildLaptopListParams(filters) {
 }
 
 async function getCollection(path, params, signal) {
-  const url = new URL(`${API_BASE_URL}/${path}`)
+  const url = new URL(getApiUrl(path))
   url.search = new URLSearchParams(params).toString()
   const response = await fetch(url, { signal })
 
@@ -42,7 +40,7 @@ async function getCollection(path, params, signal) {
 
 const laptopListApi = {
   async getAll(filters, signal) {
-    const url = new URL(`${API_BASE_URL}/laptops`)
+    const url = new URL(getApiUrl('laptops'))
     url.search = new URLSearchParams(filters).toString()
     const response = await fetch(url, { signal })
 

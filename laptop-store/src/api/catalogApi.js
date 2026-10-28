@@ -1,10 +1,7 @@
-const API_BASE_URL = (
-  import.meta.env.VITE_API_URL || 'http://localhost:3001'
-).replace(/\/$/, '')
+import { getApiUrl } from './apiUrl'
 
 async function getCollection(path, signal) {
-  const url = `${API_BASE_URL}/${path}`
-  const response = await fetch(url, { signal })
+  const response = await fetch(getApiUrl(path), { signal })
 
   if (!response.ok) {
     throw new Error(`Không thể tải dữ liệu ${path} (HTTP ${response.status})`)

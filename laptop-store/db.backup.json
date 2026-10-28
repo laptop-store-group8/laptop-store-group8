@@ -1,0 +1,115 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "email": "admin@laptopstore.vn",
+      "password": "123456",
+      "fullName": "Quản trị viên",
+      "role": "admin"
+    },
+    {
+      "id": 2,
+      "email": "khach@laptopstore.vn",
+      "password": "123456",
+      "fullName": "Nguyễn Văn An",
+      "role": "customer"
+    }
+  ],
+  "brands": [
+    { "id": 1, "name": "Dell" },
+    { "id": 2, "name": "Apple" },
+    { "id": 3, "name": "Asus" },
+    { "id": 4, "name": "Lenovo" }
+  ],
+  "categories": [
+    { "id": 1, "name": "Văn phòng" },
+    { "id": 2, "name": "Gaming" },
+    { "id": 3, "name": "Đồ họa – Kỹ thuật" },
+    { "id": 4, "name": "Mỏng nhẹ" }
+  ],
+  "laptops": [
+    {
+      "id": 1,
+      "name": "Dell XPS 13",
+      "brandId": 1,
+      "categoryId": 4,
+      "price": 42990000,
+      "salePrice": 39990000,
+      "cpu": "Intel Core Ultra 7",
+      "ram": 16,
+      "storage": 512,
+      "screen": "13.4 inch FHD+",
+      "gpu": "Intel Arc Graphics",
+      "weight": 1.19,
+      "stock": 8,
+      "sold": 120,
+      "rating": 4.7,
+      "image": "https://placehold.co/600x400?text=Dell+XPS+13",
+      "description": "Laptop mỏng nhẹ cao cấp.",
+      "createdAt": "2026-08-01T08:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "MacBook Air M3",
+      "brandId": 2,
+      "categoryId": 4,
+      "price": 27990000,
+      "salePrice": null,
+      "cpu": "Apple M3",
+      "ram": 8,
+      "storage": 256,
+      "screen": "13.6 inch Liquid Retina",
+      "gpu": "Apple GPU",
+      "weight": 1.24,
+      "stock": 15,
+      "sold": 340,
+      "rating": 4.8,
+      "image": "https://placehold.co/600x400?text=MacBook+Air+M3",
+      "description": "Laptop mỏng nhẹ, thời lượng pin dài.",
+      "createdAt": "2026-07-15T08:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Asus ROG Strix G16",
+      "brandId": 3,
+      "categoryId": 2,
+      "price": 45990000,
+      "salePrice": 41490000,
+      "cpu": "Intel Core i9",
+      "ram": 32,
+      "storage": 1024,
+      "screen": "16 inch QHD+",
+      "gpu": "NVIDIA RTX 4070",
+      "weight": 2.5,
+      "stock": 3,
+      "sold": 75,
+      "rating": 4.6,
+      "image": "https://placehold.co/600x400?text=Asus+ROG+Strix+G16",
+      "description": "Laptop gaming hiệu năng cao.",
+      "createdAt": "2026-09-05T08:00:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Lenovo ThinkPad E14",
+      "brandId": 4,
+      "categoryId": 1,
+      "price": 18990000,
+      "salePrice": 17490000,
+      "cpu": "AMD Ryzen 5",
+      "ram": 16,
+      "storage": 512,
+      "screen": "14 inch WUXGA",
+      "gpu": "AMD Radeon Graphics",
+      "weight": 1.41,
+      "stock": 0,
+      "sold": 210,
+      "rating": 4.4,
+      "image": "https://placehold.co/600x400?text=Lenovo+ThinkPad+E14",
+      "description": "Laptop văn phòng bền bỉ.",
+      "createdAt": "2026-06-20T08:00:00Z"
+    }
+  ],
+  "reviews": [],
+  "cartItems": [],
+  "orders": []
+}

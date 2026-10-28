@@ -1,10 +1,11 @@
 import './App.css'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import AdminLayout from './components/layout/AdminLayout'
 import MainLayout from './components/layout/MainLayout'
+import AdminDashboardPage from './pages/admin/AdminDashboardPage'
 import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage'
-import AdminLaptopPage from './pages/admin/AdminLaptopPage'
-import AdminOrderPage from './pages/admin/AdminOrderPage'
+import AdminLaptopListPage from './pages/admin/AdminLaptopListPage'
+import AdminOrderListPage from './pages/admin/AdminOrderListPage'
 import CartPage from './pages/CartPage'
 import CheckoutPage from './pages/CheckoutPage'
 import HomePage from './pages/HomePage'
@@ -33,11 +34,12 @@ export default function App() {
       </Route>
 
       <Route path="admin" element={<AdminLayout />}>
-        <Route index element={<Navigate to="laptops" replace />} />
-        <Route path="laptops" element={<AdminLaptopPage />} />
+        <Route index element={<AdminDashboardPage />} />
+        <Route path="laptops" element={<AdminLaptopListPage />} />
         <Route path="laptops/new" element={<AdminLaptopFormPage />} />
+        <Route path="laptops/:id" element={<AdminLaptopFormPage />} />
         <Route path="laptops/:id/edit" element={<AdminLaptopFormPage />} />
-        <Route path="orders" element={<AdminOrderPage />} />
+        <Route path="orders" element={<AdminOrderListPage />} />
       </Route>
     </Routes>
   );

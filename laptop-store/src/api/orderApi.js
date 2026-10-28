@@ -4,10 +4,23 @@ async function request(path, options = {}) {
   const response = await fetch(getApiUrl(path), options)
 
   if (!response.ok) {
-    throw new Error(`Không thể tải dữ liệu đơn hàng (HTTP ${response.status})`)
+    throw new Error(`Không thể xử lý đơn hàng (HTTP ${response.status})`)
   }
 
   return response.json()
+}
+
+function buildQuery(params = {}) {
+  const searchParams = new URLSearchParams()
+
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      searchParams.set(key, String(value))
+    }
+  })
+
+  const query = searchParams.toString()
+  return query ? `?${query}` : ''
 }
 
 const orderApi = {
@@ -16,11 +29,16 @@ const orderApi = {
     return request(`orders?${params}`, { signal })
   },
 
-  updateStatus(id, status) {
+  getAll(params = {}, signal) {
+    return request(`orders${buildQuery(params)}`, { signal })
+  },
+
+  updateStatus(id, status, signal) {
     return request(`orders/${encodeURIComponent(id)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
+      signal,
     })
   },
 

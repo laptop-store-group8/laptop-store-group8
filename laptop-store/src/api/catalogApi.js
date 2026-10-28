@@ -1,21 +1,14 @@
-import { getApiUrl } from './apiUrl'
-
-async function getCollection(path, signal) {
-  const response = await fetch(getApiUrl(path), { signal })
-
-  if (!response.ok) {
-    throw new Error(`Không thể tải dữ liệu ${path} (HTTP ${response.status})`)
-  }
-
-  return response.json()
-}
+import axiosClient from './axiosClient'
 
 const catalogApi = {
-  getBrands(signal) {
-    return getCollection('brands', signal)
+  async getBrands(signal) {
+    const response = await axiosClient.get('/brands', { signal })
+    return response.data
   },
-  getCategories(signal) {
-    return getCollection('categories', signal)
+
+  async getCategories(signal) {
+    const response = await axiosClient.get('/categories', { signal })
+    return response.data
   },
 }
 

@@ -1,15 +1,15 @@
-import axiosClient from './axiosClient';
+import axiosClient from './axiosClient'
 
 const catalogApi = {
   async getBrands(signal) {
-    const res = await axiosClient.get('/brands', { signal });
-    return res.data;
+    const response = await axiosClient.get('/brands', { signal })
+    return response.data
   },
 
   async getCategories(signal) {
-    const res = await axiosClient.get('/categories', { signal });
-    return res.data;
+    const response = await axiosClient.get('/categories', { signal })
+    return response.data
   },
-};
+}
 
-export default catalogApi;
+export default catalogApi

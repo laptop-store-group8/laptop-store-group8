@@ -9,13 +9,16 @@ const reviewApi = {
     return res.data;
   },
 
-  async findByUser(laptopId, userId) {
-    const res = await axiosClient.get('/reviews', { params: { laptopId, userId } });
+  async findByUser(laptopId, userId, signal) {
+    const res = await axiosClient.get('/reviews', {
+      params: { laptopId, userId },
+      signal,
+    });
     return res.data[0] ?? null;
   },
 
-  async create(data) {
-    const res = await axiosClient.post('/reviews', data);
+  async create(data, signal) {
+    const res = await axiosClient.post('/reviews', data, { signal });
     return res.data;
   },
 };

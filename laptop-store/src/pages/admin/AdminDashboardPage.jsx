@@ -19,6 +19,19 @@ export default function AdminDashboardPage() {
             </Card.Body>
           </Card>
         </Col>
+        <Col md={6} lg={4}>
+          <Card className="h-100 shadow-sm">
+            <Card.Body>
+              <Card.Title>Quản lý đơn hàng</Card.Title>
+              <Card.Text className="text-secondary">
+                Theo dõi đơn hàng và cập nhật trạng thái theo đúng quy trình.
+              </Card.Text>
+              <Button as={Link} to="/admin/orders">
+                Mở danh sách
+              </Button>
+            </Card.Body>
+          </Card>
+        </Col>
       </Row>
     </Container>
   )

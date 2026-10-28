@@ -134,21 +134,28 @@ function LaptopDetail({ id }) {
       user,
     }
 
-    laptopDetailApi
-      .getUserReviews(laptop.id, user.id, controller.signal)
-      .then((reviews) => {
+    async function loadReviewAccess() {
+      try {
+        const reviews = await laptopDetailApi.getUserReviews(
+          laptop.id,
+          user.id,
+          controller.signal,
+        )
         if (controller.signal.aborted) return
+
         const alreadyReviewed = reviews.length > 0
         setReviewAccess({
           ...access,
           status: alreadyReviewed ? 'already-reviewed' : 'eligible',
         })
-      })
-      .catch((reviewError) => {
+      } catch (reviewError) {
         if (!controller.signal.aborted) {
           setReviewAccess({ ...access, status: 'error', error: reviewError })
         }
-      })
+      }
+    }
+
+    loadReviewAccess()
 
     return () => controller.abort()
   }, [laptop?.id, user])

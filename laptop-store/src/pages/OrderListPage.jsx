@@ -58,9 +58,9 @@ export default function OrderListPage() {
     if (!userId) return undefined
 
     const controller = new AbortController()
-    orderApi
-      .getByUser(userId, controller.signal)
-      .then((data) => {
+    async function loadOrders() {
+      try {
+        const data = await orderApi.getByUser(userId, controller.signal)
         if (!controller.signal.aborted) {
           setResult({
             userId,
@@ -69,12 +69,14 @@ export default function OrderListPage() {
             error: null,
           })
         }
-      })
-      .catch((error) => {
+      } catch (error) {
         if (!controller.signal.aborted) {
           setResult({ userId, retry, orders: null, error })
         }
-      })
+      }
+    }
+
+    loadOrders()
 
     return () => controller.abort()
   }, [userId, retry])

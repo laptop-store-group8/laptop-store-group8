@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer.jsx'
 import AdminDashboardPage from './pages/admin/AdminDashboardPage.jsx'
 import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage.jsx'
 import AdminLaptopListPage from './pages/admin/AdminLaptopListPage.jsx'
+import AdminOrderListPage from './pages/admin/AdminOrderListPage.jsx'
 import HomePage from './pages/HomePage.jsx'
 import LaptopDetailPage from './pages/LaptopDetailPage.jsx'
 import LaptopListPage from './pages/LaptopListPage.jsx'
@@ -24,6 +25,7 @@ function App() {
         <Route path="/admin/laptops" element={<AdminLaptopListPage />} />
         <Route path="/admin/laptops/new" element={<AdminLaptopFormPage />} />
         <Route path="/admin/laptops/:id" element={<AdminLaptopFormPage />} />
+        <Route path="/admin/orders" element={<AdminOrderListPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
       <Footer />

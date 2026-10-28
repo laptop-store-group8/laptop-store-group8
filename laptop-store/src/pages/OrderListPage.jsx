@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Alert,
   Badge,
@@ -17,6 +17,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import { formatDateTime, formatPrice } from '../utils/format'
 import { getStatus } from '../utils/orderStatus'
+import useAxios from '../hooks/useAxios'
 
 function sortNewestFirst(orders) {
   return [...orders].sort(
@@ -32,15 +33,23 @@ export default function OrderListPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const consumedLocationKey = useRef(null)
-  const [result, setResult] = useState(null)
-  const [retry, setRetry] = useState(0)
   const [orderToCancel, setOrderToCancel] = useState(null)
   const [cancelling, setCancelling] = useState(false)
   const userId = user?.id === undefined ? null : String(user.id)
-  const currentResult =
-    result?.userId === userId && result.retry === retry ? result : null
-  const orders = currentResult?.orders
-  const loading = Boolean(userId) && (!currentResult || currentResult.loading)
+  const fetchOrders = useCallback(async (signal) => {
+    if (!userId) return []
+
+    const data = await orderApi.getByUser(userId, signal)
+    return sortNewestFirst(data)
+  }, [userId])
+  const {
+    data: orders,
+    loading: ordersLoading,
+    error,
+    refetch,
+    setData,
+  } = useAxios(fetchOrders, [userId])
+  const loading = Boolean(userId) && ordersLoading
 
   useEffect(() => {
     const message = location.state?.message
@@ -53,33 +62,6 @@ export default function OrderListPage() {
       state: null,
     })
   }, [location, navigate, showToast])
-
-  useEffect(() => {
-    if (!userId) return undefined
-
-    const controller = new AbortController()
-    async function loadOrders() {
-      try {
-        const data = await orderApi.getByUser(userId, controller.signal)
-        if (!controller.signal.aborted) {
-          setResult({
-            userId,
-            retry,
-            orders: sortNewestFirst(data),
-            error: null,
-          })
-        }
-      } catch (error) {
-        if (!controller.signal.aborted) {
-          setResult({ userId, retry, orders: null, error })
-        }
-      }
-    }
-
-    loadOrders()
-
-    return () => controller.abort()
-  }, [userId, retry])
 
   async function confirmCancel() {
     const order = orderToCancel
@@ -95,22 +77,13 @@ export default function OrderListPage() {
         (stockResult) => stockResult.status === 'rejected',
       )
 
-      setResult((current) => {
-        if (
-          current?.userId !== userId ||
-          current.retry !== retry ||
-          !current.orders
-        ) {
-          return current
-        }
-
-        return {
-          ...current,
-          orders: current.orders.map((currentOrder) =>
+      setData((currentOrders) =>
+        currentOrders
+          ? currentOrders.map((currentOrder) =>
             currentOrder.id === order.id ? updatedOrder : currentOrder,
-          ),
-        }
-      })
+            )
+          : currentOrders,
+      )
 
       if (failedRestocks.length > 0) {
         showToast(
@@ -139,12 +112,12 @@ export default function OrderListPage() {
   }
 
   if (loading) return <Loading text="Đang tải đơn hàng..." />
-  if (currentResult?.error) {
+  if (error) {
     return (
       <Container as="main" className="py-4">
         <ErrorAlert
-          message={currentResult.error.message}
-          onRetry={() => setRetry((currentRetry) => currentRetry + 1)}
+          message={error.message || 'Không thể tải đơn hàng.'}
+          onRetry={refetch}
         />
       </Container>
     )

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Button, Col, Container, Form, Offcanvas, Row } from 'react-bootstrap'
 import { useSearchParams } from 'react-router-dom'
 import laptopListApi, { buildLaptopListParams } from '../api/laptopListApi'
@@ -7,6 +7,7 @@ import ErrorAlert from '../components/common/ErrorAlert'
 import LaptopFilter from '../components/laptop/LaptopFilter'
 import LaptopGrid from '../components/laptop/LaptopGrid'
 import DebouncedLaptopSearch from '../components/laptop/DebouncedLaptopSearch'
+import useAxios from '../hooks/useAxios'
 
 const FILTER_KEYS = [
   'brandId',
@@ -27,10 +28,6 @@ const SORT_OPTIONS = {
 const PAGE_SIZE = 8
 const EMPTY_CATALOG = { brands: [], categories: [] }
 
-function isAbortError(error) {
-  return error?.name === 'AbortError'
-}
-
 export default function LaptopListPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [showFilter, setShowFilter] = useState(false)
@@ -44,10 +41,6 @@ export default function LaptopListPage() {
   )
   const page = Math.max(1, Number(filters.page) || 1)
   const sort = SORT_OPTIONS[filters.sort] ? filters.sort : 'newest'
-  const [result, setResult] = useState(null)
-  const [catalogResult, setCatalogResult] = useState(null)
-  const [retry, setRetry] = useState(0)
-
   const updateParams = useCallback(
     (patch, { resetPage = true } = {}) => {
       const next = new URLSearchParams(searchParams)
@@ -74,70 +67,34 @@ export default function LaptopListPage() {
     [filters.q, updateParams],
   )
 
-  useEffect(() => {
-    const controller = new AbortController()
-
-    async function loadCatalog() {
-      try {
-        const [brands, categories] = await Promise.all([
-          laptopListApi.getBrands(controller.signal),
-          laptopListApi.getCategories(controller.signal),
-        ])
-        if (!controller.signal.aborted) {
-          setCatalogResult({ retry, data: { brands, categories }, error: null })
-        }
-      } catch (error) {
-        if (!controller.signal.aborted && !isAbortError(error)) {
-          setCatalogResult({
-            retry,
-            data: EMPTY_CATALOG,
-            error: error.message || 'Không thể tải danh mục bộ lọc.',
-          })
-        }
-      }
-    }
-
-    loadCatalog()
-    return () => controller.abort()
-  }, [retry])
-
-  useEffect(() => {
-    const controller = new AbortController()
-    const params = buildLaptopListParams({ ...filters, sort, page })
-
-    async function loadLaptops() {
-      try {
-        const data = await laptopListApi.getAll(
-          params,
-          controller.signal,
-        )
-        if (!controller.signal.aborted) {
-          setResult({ queryString, retry, data, error: null })
-        }
-      } catch (error) {
-        if (!controller.signal.aborted && !isAbortError(error)) {
-          setResult({
-            queryString,
-            retry,
-            data: null,
-            error: error.message || 'Không thể tải danh sách laptop.',
-          })
-        }
-      }
-    }
-
-    loadLaptops()
-    return () => controller.abort()
-  }, [filters, page, queryString, retry, sort])
-
-  const currentResult =
-    result?.queryString === queryString && result.retry === retry ? result : null
-  const currentCatalog =
-    catalogResult?.retry === retry ? catalogResult : null
-  const loading = !currentResult
-  const data = currentResult?.data
-  const error = currentResult?.error || currentCatalog?.error
-  const catalog = currentCatalog?.data || EMPTY_CATALOG
+  const fetchCatalog = useCallback(async (signal) => {
+    const [brands, categories] = await Promise.all([
+      laptopListApi.getBrands(signal),
+      laptopListApi.getCategories(signal),
+    ])
+    return { brands, categories }
+  }, [])
+  const {
+    data: catalogData,
+    error: catalogError,
+    refetch: refetchCatalog,
+  } = useAxios(fetchCatalog)
+  const fetchLaptops = useCallback(
+    (signal) =>
+      laptopListApi.getAll(
+        buildLaptopListParams({ ...filters, sort, page }),
+        signal,
+      ),
+    [filters, page, sort],
+  )
+  const {
+    data,
+    loading,
+    error: laptopError,
+    refetch,
+  } = useAxios(fetchLaptops, [queryString])
+  const error = laptopError || catalogError
+  const catalog = catalogData || EMPTY_CATALOG
   const totalPages = data ? Math.ceil(data.total / PAGE_SIZE) : 0
 
   const filterProps = {
@@ -209,8 +166,14 @@ export default function LaptopListPage() {
 
           {error ? (
             <ErrorAlert
-              message={error}
-              onRetry={() => setRetry((currentRetry) => currentRetry + 1)}
+              message={
+                error.message ||
+                'Không thể tải danh sách laptop hoặc danh mục bộ lọc.'
+              }
+              onRetry={() => {
+                if (laptopError) refetch()
+                if (catalogError) refetchCatalog()
+              }}
             />
           ) : (
             <LaptopGrid

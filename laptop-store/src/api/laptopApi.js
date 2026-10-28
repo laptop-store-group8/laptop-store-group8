@@ -33,6 +33,14 @@ const laptopApi = {
       signal,
     })
   },
+  patch(id, payload, signal) {
+    return request(`laptops/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal,
+    })
+  },
   delete(id, signal) {
     return request(`laptops/${encodeURIComponent(id)}`, {
       method: 'DELETE',

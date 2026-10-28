@@ -14,7 +14,7 @@ import EmptyState from '../components/common/EmptyState'
 import ErrorAlert from '../components/common/ErrorAlert'
 import Loading from '../components/common/Loading'
 import { useAuth } from '../contexts/AuthContext'
-import { useToast } from '../contexts/ToastContext'
+import useToast from '../hooks/useToast'
 import { formatDateTime, formatPrice } from '../utils/format'
 import { getStatus } from '../utils/orderStatus'
 

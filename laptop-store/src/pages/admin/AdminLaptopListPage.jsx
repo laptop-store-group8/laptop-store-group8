@@ -5,7 +5,7 @@ import laptopApi from '../../api/laptopApi'
 import ConfirmModal from '../../components/common/ConfirmModal'
 import ErrorAlert from '../../components/common/ErrorAlert'
 import Loading from '../../components/common/Loading'
-import { useToast } from '../../contexts/ToastContext'
+import useToast from '../../hooks/useToast'
 import { formatPrice } from '../../utils/format'
 
 export default function AdminLaptopListPage() {

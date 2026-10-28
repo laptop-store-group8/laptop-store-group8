@@ -3,7 +3,7 @@ import { Badge, Container, Nav, Navbar, NavDropdown } from 'react-bootstrap'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useCart } from '../../contexts/CartContext'
-import { useToast } from '../../contexts/ToastContext'
+import useToast from '../../hooks/useToast'
 import SearchSuggest from './SearchSuggest'
 
 export default function AppNavbar() {

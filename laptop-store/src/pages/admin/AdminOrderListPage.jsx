@@ -4,7 +4,7 @@ import { useSearchParams } from 'react-router-dom'
 import orderApi from '../../api/orderApi'
 import ErrorAlert from '../../components/common/ErrorAlert'
 import Loading from '../../components/common/Loading'
-import { useToast } from '../../contexts/ToastContext'
+import useToast from '../../hooks/useToast'
 import { formatDate, formatPrice } from '../../utils/format'
 import { getStatus, NEXT_STATUS, ORDER_STATUS } from '../../utils/orderStatus'
 

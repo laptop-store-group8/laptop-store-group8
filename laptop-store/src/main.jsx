@@ -5,7 +5,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import './index.css';
 import App from './App.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
-import ToastProvider from './contexts/ToastProvider.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -13,9 +12,7 @@ createRoot(document.getElementById('root')).render(
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
       <AuthProvider>
-        <ToastProvider>
-          <App />
-        </ToastProvider>
+        <App />
       </AuthProvider>
     </BrowserRouter>
   </StrictMode>,

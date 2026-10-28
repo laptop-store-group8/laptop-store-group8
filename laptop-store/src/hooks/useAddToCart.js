@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { useToast } from '../contexts/ToastContext'
+import useToast from './useToast'
 
 export default function useAddToCart() {
   const { user } = useAuth()

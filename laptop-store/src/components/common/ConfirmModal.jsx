@@ -12,9 +12,16 @@ export default function ConfirmModal({
   onCancel,
 }) {
   return (
-    <Modal show={show} onHide={loading ? undefined : onCancel} centered>
+    <Modal
+      show={show}
+      centered
+      onHide={loading ? undefined : onCancel}
+      backdrop={loading ? 'static' : true}
+      keyboard={!loading}
+      aria-labelledby="confirm-modal-title"
+    >
       <Modal.Header closeButton={!loading}>
-        <Modal.Title>{title}</Modal.Title>
+        <Modal.Title id="confirm-modal-title">{title}</Modal.Title>
       </Modal.Header>
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
@@ -26,7 +33,14 @@ export default function ConfirmModal({
           {cancelText}
         </Button>
         <Button variant={variant} onClick={onConfirm} disabled={loading}>
-          {loading && <Spinner size="sm" className="me-2" />}
+          {loading && (
+            <Spinner
+              animation="border"
+              aria-hidden="true"
+              className="me-2"
+              size="sm"
+            />
+          )}
           {confirmText}
         </Button>
       </Modal.Footer>

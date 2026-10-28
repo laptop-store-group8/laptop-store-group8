@@ -1,4 +1,4 @@
-import { Button, Modal, Spinner } from 'react-bootstrap';
+import { Button, Modal, Spinner } from 'react-bootstrap'
 
 export default function ConfirmModal({
   show,
@@ -6,7 +6,7 @@ export default function ConfirmModal({
   message,
   confirmText = 'Xác nhận',
   cancelText = 'Hủy',
-  variant = 'primary',
+  variant = 'danger',
   loading = false,
   onConfirm,
   onCancel,
@@ -15,7 +15,7 @@ export default function ConfirmModal({
     <Modal
       show={show}
       centered
-      onHide={onCancel}
+      onHide={loading ? undefined : onCancel}
       backdrop={loading ? 'static' : true}
       keyboard={!loading}
       aria-labelledby="confirm-modal-title"
@@ -26,7 +26,7 @@ export default function ConfirmModal({
       <Modal.Body>{message}</Modal.Body>
       <Modal.Footer>
         <Button
-          variant="secondary"
+          variant="outline-secondary"
           onClick={onCancel}
           disabled={loading}
         >
@@ -45,5 +45,5 @@ export default function ConfirmModal({
         </Button>
       </Modal.Footer>
     </Modal>
-  );
+  )
 }

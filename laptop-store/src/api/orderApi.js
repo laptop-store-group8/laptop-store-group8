@@ -25,12 +25,27 @@ function buildQuery(params = {}) {
 
 const orderApi = {
   getByUser(userId, signal) {
-    const params = new URLSearchParams({ userId: String(userId) })
+    const params = new URLSearchParams({
+      userId: String(userId),
+      _sort: 'createdAt',
+      _order: 'desc',
+    })
     return request(`orders?${params}`, { signal })
   },
 
   getAll(params = {}, signal) {
-    return request(`orders${buildQuery(params)}`, { signal })
+    return request(
+      `orders${buildQuery({ _sort: 'createdAt', _order: 'desc', ...params })}`,
+      { signal },
+    )
+  },
+
+  create(order) {
+    return request('orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order),
+    })
   },
 
   updateStatus(id, status, signal) {
@@ -58,5 +73,4 @@ const orderApi = {
     })
   },
 }
-
 export default orderApi

@@ -1,20 +1,16 @@
-import { Button } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import usePageTitle from '../hooks/usePageTitle';
+import { Button, Container } from 'react-bootstrap'
+import { Link } from 'react-router-dom'
 
 export default function NotFoundPage() {
-  usePageTitle('Không tìm thấy trang');
-
   return (
-    <div className="text-center py-5">
-      <div className="display-1 fw-bold text-primary">404</div>
-      <h3 className="mb-3">Không tìm thấy trang</h3>
+    <Container as="main" className="py-5 text-center">
+      <h1 className="h3">Không tìm thấy dữ liệu</h1>
       <p className="text-secondary mb-4">
-        Đường dẫn bạn truy cập không tồn tại hoặc đã bị xóa.
+        Trang hoặc laptop bạn đang tìm không tồn tại.
       </p>
-      <Button as={Link} to="/" size="lg">
-        Về trang chủ
+      <Button as={Link} to="/laptops" variant="primary">
+        Về danh sách laptop
       </Button>
-    </div>
-  );
+    </Container>
+  )
 }

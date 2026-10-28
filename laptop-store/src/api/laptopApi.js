@@ -10,7 +10,8 @@ export const SORT_OPTIONS = {
 }
 
 export function buildLaptopParams(filters = {}, limit = PAGE_SIZE) {
-  const { brandId, categoryId, priceMin, priceMax, ramMin, q, sort, page } = filters
+  const { brandId, categoryId, priceMin, priceMax, ramMin, q, sort, page } =
+    filters
   const sortOption = SORT_OPTIONS[sort] ?? SORT_OPTIONS.newest
   const params = {
     _sort: sortOption._sort,

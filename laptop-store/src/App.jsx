@@ -8,6 +8,7 @@ import CartPage from './pages/CartPage';
 import CheckoutPage from './pages/CheckoutPage';
 import HomePage from './pages/HomePage';
 import LaptopDetailPage from './pages/LaptopDetailPage';
+import LaptopFilterDemoPage from './pages/LaptopFilterDemoPage';
 import LaptopListPage from './pages/LaptopListPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
@@ -20,6 +21,9 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="laptops" element={<LaptopListPage />} />
         <Route path="laptops/:id" element={<LaptopDetailPage />} />
+        {import.meta.env.DEV && (
+          <Route path="dev/laptop-filter" element={<LaptopFilterDemoPage />} />
+        )}
         <Route path="login" element={<LoginPage />} />
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />

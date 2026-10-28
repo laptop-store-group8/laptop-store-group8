@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import ErrorAlert from '../components/common/ErrorAlert'
 import LaptopGrid from '../components/laptop/LaptopGrid'
 import homeApi from '../api/homeApi'
+import useAxios from '../hooks/useAxios'
 
 const BANNERS = [
   {
@@ -54,34 +55,8 @@ async function loadSequential(signal) {
 }
 
 export default function HomePage() {
-  const [data, setData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { data, loading, error, refetch } = useAxios(loadParallel)
   const [benchmark, setBenchmark] = useState(null)
-  const [retry, setRetry] = useState(0)
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    async function load() {
-      try {
-        const result = await loadParallel(controller.signal)
-        setData(result)
-      } catch (loadError) {
-        if (!controller.signal.aborted) {
-          setData(null)
-          setError(loadError.message || 'Không thể tải dữ liệu trang chủ.')
-        }
-      } finally {
-        if (!controller.signal.aborted) {
-          setLoading(false)
-        }
-      }
-    }
-
-    load()
-    return () => controller.abort()
-  }, [retry])
 
   useEffect(() => {
     if (!import.meta.env.DEV || !data) {
@@ -106,13 +81,6 @@ export default function HomePage() {
     measureSequentialLoad()
     return () => controller.abort()
   }, [data])
-
-  function retryLoad() {
-    setData(null)
-    setLoading(true)
-    setError('')
-    setRetry((currentRetry) => currentRetry + 1)
-  }
 
   const currentBenchmark = benchmark?.data === data ? benchmark : null
 
@@ -151,8 +119,8 @@ export default function HomePage() {
 
       {error ? (
         <ErrorAlert
-          message={error}
-          onRetry={retryLoad}
+          message={error.message || 'Không thể tải dữ liệu trang chủ.'}
+          onRetry={refetch}
         />
       ) : (
         <>

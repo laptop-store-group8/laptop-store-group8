@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   Alert,
   Badge,
@@ -25,6 +25,7 @@ import ReviewList from '../components/laptop/ReviewList'
 import { useAuth } from '../contexts/AuthContext'
 import { useToast } from '../contexts/ToastContext'
 import useAddToCart from '../hooks/useAddToCart'
+import useAxios from '../hooks/useAxios'
 import { FALLBACK_IMAGE, handleImageError } from '../utils/image'
 import NotFoundPage from './NotFoundPage'
 
@@ -77,50 +78,23 @@ function LaptopDetail({ id }) {
   const { user } = useAuth()
   const { showToast } = useToast()
   const { add, adding } = useAddToCart()
-  const [result, setResult] = useState(null)
-  const [retry, setRetry] = useState(0)
-  const [notFound, setNotFound] = useState(false)
   const [reviewAccess, setReviewAccess] = useState(null)
-  const data = result?.id === id && result.retry === retry ? result.data : null
-  const error =
-    result?.id === id && result.retry === retry ? result.error : null
-  const loading = !data && !error && !notFound
+  const fetchLaptop = useCallback((signal) => loadLaptop(id, signal), [id])
+  const {
+    data,
+    error,
+    loading,
+    refetch,
+    setData,
+  } = useAxios(fetchLaptop, [id])
+  const notFound =
+    error?.status === 404 || /HTTP 404/.test(error?.message || '')
   const laptop = data?.laptop
   const reviewAccessMatchesUser =
     reviewAccess?.user === user &&
     reviewAccess?.laptopId === String(laptop?.id) &&
     reviewAccess?.userId === String(user?.id)
   const currentReviewAccess = reviewAccessMatchesUser ? reviewAccess : null
-
-  useEffect(() => {
-    const controller = new AbortController()
-
-    async function load() {
-      try {
-        const detail = await loadLaptop(id, controller.signal)
-        if (!controller.signal.aborted) {
-          setNotFound(false)
-          setResult({ id, retry, data: detail, error: null })
-        }
-      } catch (loadError) {
-        if (!controller.signal.aborted) {
-          if (loadError?.status === 404 || /HTTP 404/.test(loadError?.message)) {
-            setNotFound(true)
-          } else {
-            setResult({
-              id,
-              retry,
-              data: null,
-              error: errorMessage(loadError),
-            })
-          }
-        }
-      }
-    }
-
-    load()
-    return () => controller.abort()
-  }, [id, retry])
 
   useEffect(() => {
     if (!user?.id || !laptop?.id) {
@@ -164,23 +138,6 @@ function LaptopDetail({ id }) {
     document.title = laptop ? `${laptop.name} | LaptopStore` : 'Chi tiết laptop'
   }, [laptop])
 
-  function setData(update) {
-    setResult((current) => {
-      if (
-        current?.id !== id ||
-        current.retry !== retry ||
-        !current.data
-      ) {
-        return current
-      }
-
-      return {
-        ...current,
-        data: update(current.data),
-      }
-    })
-  }
-
   async function submitReview({ rating, comment }) {
     const review = await laptopDetailApi.addReview({
       laptopId: laptop.id,
@@ -191,10 +148,14 @@ function LaptopDetail({ id }) {
       createdAt: new Date().toISOString(),
     })
 
-    setData((currentData) => ({
-      ...currentData,
-      reviews: [review, ...currentData.reviews],
-    }))
+    setData((currentData) =>
+      currentData
+        ? {
+            ...currentData,
+            reviews: [review, ...currentData.reviews],
+          }
+        : currentData,
+    )
     setReviewAccess({
       laptopId: String(laptop.id),
       userId: String(user.id),
@@ -216,8 +177,8 @@ function LaptopDetail({ id }) {
     return (
       <Container as="main" className="py-4">
         <ErrorAlert
-          message={error}
-          onRetry={() => setRetry((currentRetry) => currentRetry + 1)}
+          message={errorMessage(error)}
+          onRetry={refetch}
         />
         <Button variant="link" onClick={() => navigate('/laptops')}>
           ← Về danh sách laptop

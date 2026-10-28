@@ -1,18 +1,19 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
-import AdminLayout from './components/layout/AdminLayout';
-import MainLayout from './components/layout/MainLayout';
-import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage';
-import AdminLaptopPage from './pages/admin/AdminLaptopPage';
-import AdminOrderPage from './pages/admin/AdminOrderPage';
-import CartPage from './pages/CartPage';
-import CheckoutPage from './pages/CheckoutPage';
-import HomePage from './pages/HomePage';
-import LaptopDetailPage from './pages/LaptopDetailPage';
-import LaptopFilterDemoPage from './pages/LaptopFilterDemoPage';
-import LaptopListPage from './pages/LaptopListPage';
-import LoginPage from './pages/LoginPage';
-import NotFoundPage from './pages/NotFoundPage';
-import OrderListPage from './pages/OrderListPage';
+import './App.css'
+import { Navigate, Route, Routes } from 'react-router-dom'
+import AdminLayout from './components/layout/AdminLayout'
+import MainLayout from './components/layout/MainLayout'
+import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage'
+import AdminLaptopPage from './pages/admin/AdminLaptopPage'
+import AdminOrderPage from './pages/admin/AdminOrderPage'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+import HomePage from './pages/HomePage'
+import LaptopDetailPage from './pages/LaptopDetailPage'
+import LaptopFilterDemoPage from './pages/LaptopFilterDemoPage'
+import LaptopListPage from './pages/LaptopListPage'
+import LoginPage from './pages/LoginPage'
+import NotFoundPage from './pages/NotFoundPage'
+import OrderListPage from './pages/OrderListPage'
 
 export default function App() {
   return (

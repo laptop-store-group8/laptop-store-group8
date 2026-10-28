@@ -12,6 +12,7 @@ import LaptopListPage from './pages/LaptopListPage';
 import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import OrderListPage from './pages/OrderListPage';
+import ToastDemoPage from './pages/ToastDemoPage';
 
 export default function App() {
   return (
@@ -21,6 +22,9 @@ export default function App() {
         <Route path="laptops" element={<LaptopListPage />} />
         <Route path="laptops/:id" element={<LaptopDetailPage />} />
         <Route path="login" element={<LoginPage />} />
+        {import.meta.env.DEV && (
+          <Route path="dev/toast-demo" element={<ToastDemoPage />} />
+        )}
         <Route path="cart" element={<CartPage />} />
         <Route path="checkout" element={<CheckoutPage />} />
         <Route path="orders" element={<OrderListPage />} />

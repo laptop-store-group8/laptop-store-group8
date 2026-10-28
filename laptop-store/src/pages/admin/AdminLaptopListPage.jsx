@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Button,
   Card,
@@ -42,7 +42,10 @@ export default function AdminLaptopListPage() {
   const [stockDraft, setStockDraft] = useState('')
   const [savingStockId, setSavingStockId] = useState(null)
   const [laptopToDelete, setLaptopToDelete] = useState(null)
+  const [selectedIds, setSelectedIds] = useState(() => new Set())
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const selectAllRef = useRef(null)
   const debouncedSearch = useDebounce(search.trim(), 400)
   const fetchLaptops = useCallback(
     (signal) =>
@@ -76,6 +79,7 @@ export default function AdminLaptopListPage() {
     setSearch(event.target.value)
     setPage(1)
     setEditingStockId(null)
+    setSelectedIds(new Set())
   }
 
   function beginStockEdit(laptop) {
@@ -167,8 +171,82 @@ export default function AdminLaptopListPage() {
     } finally {
       setDeleting(false)
       setLaptopToDelete(null)
+      setSelectedIds((current) => {
+        const next = new Set(current)
+        next.delete(deletedLaptop.id)
+        return next
+      })
     }
   }
+
+  async function handleBulkDelete() {
+    const ids = [...selectedIds]
+    if (ids.length === 0) {
+      setBulkConfirmOpen(false)
+      return
+    }
+
+    setDeleting(true)
+    try {
+      const outcomes = await Promise.allSettled(
+        ids.map((id) => laptopApi.delete(id)),
+      )
+      const deletedIds = new Set()
+      const failedIds = []
+
+      outcomes.forEach((outcome, index) => {
+        if (outcome.status === 'fulfilled') {
+          deletedIds.add(ids[index])
+        } else {
+          failedIds.push(ids[index])
+        }
+      })
+
+      const remainingOnPage = laptops.filter(
+        (laptop) => !deletedIds.has(laptop.id),
+      ).length
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              items: current.items.filter(
+                (laptop) => !deletedIds.has(laptop.id),
+              ),
+              total: Math.max(0, current.total - deletedIds.size),
+            }
+          : current,
+      )
+      setSelectedIds(new Set(failedIds))
+      if (page > 1 && laptops.length > 0 && remainingOnPage === 0) {
+        setPage((current) => Math.max(1, current - 1))
+      }
+
+      const failedCount = failedIds.length
+      showToast(
+        `Đã xóa ${deletedIds.size}/${ids.length} laptop. ${failedCount} laptop xóa thất bại.`,
+        failedCount ? 'warning' : 'success',
+      )
+    } finally {
+      setDeleting(false)
+      setBulkConfirmOpen(false)
+    }
+  }
+
+  const laptops = result?.items ?? []
+  const totalPages = Math.ceil((result?.total ?? 0) / PAGE_SIZE)
+  const selectedOnPage = laptops.reduce(
+    (count, laptop) => count + Number(selectedIds.has(laptop.id)),
+    0,
+  )
+  const allOnPageSelected =
+    laptops.length > 0 && selectedOnPage === laptops.length
+
+  useEffect(() => {
+    if (selectAllRef.current) {
+      selectAllRef.current.indeterminate =
+        selectedOnPage > 0 && !allOnPageSelected
+    }
+  }, [allOnPageSelected, selectedOnPage])
 
   if (loading && !result) {
     return <Loading text="Đang tải danh sách laptop..." />
@@ -186,8 +264,29 @@ export default function AdminLaptopListPage() {
     )
   }
 
-  const laptops = result?.items ?? []
-  const totalPages = Math.ceil((result?.total ?? 0) / PAGE_SIZE)
+  function toggleSelected(id) {
+    setSelectedIds((current) => {
+      const next = new Set(current)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  function togglePageSelection() {
+    setSelectedIds((current) => {
+      const next = new Set(current)
+      if (allOnPageSelected) {
+        laptops.forEach((laptop) => next.delete(laptop.id))
+      } else {
+        laptops.forEach((laptop) => next.add(laptop.id))
+      }
+      return next
+    })
+  }
 
   return (
     <Container as="main" className="py-4">
@@ -201,15 +300,24 @@ export default function AdminLaptopListPage() {
         </Button>
       </div>
 
-      <Form className="mb-3" role="search">
-        <Form.Control
-          type="search"
-          aria-label="Tìm laptop trong trang quản trị"
-          placeholder="Tìm theo tên, hãng..."
-          value={search}
-          onChange={handleSearchChange}
-        />
-      </Form>
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        <Form className="flex-grow-1" role="search">
+          <Form.Control
+            type="search"
+            aria-label="Tìm laptop trong trang quản trị"
+            placeholder="Tìm theo tên, hãng..."
+            value={search}
+            onChange={handleSearchChange}
+          />
+        </Form>
+        <Button
+          variant="danger"
+          disabled={selectedIds.size === 0 || deleting || savingStockId !== null}
+          onClick={() => setBulkConfirmOpen(true)}
+        >
+          Xóa đã chọn ({selectedIds.size})
+        </Button>
+      </div>
 
       {error && (
         <ErrorAlert
@@ -225,6 +333,17 @@ export default function AdminLaptopListPage() {
         <Table responsive hover className="mb-0 align-middle">
           <thead>
             <tr>
+              <th scope="col">
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  className="form-check-input"
+                  aria-label="Chọn tất cả laptop trên trang hiện tại"
+                  checked={allOnPageSelected}
+                  onChange={togglePageSelection}
+                  disabled={laptops.length === 0 || deleting}
+                />
+              </th>
               <th scope="col">Ảnh</th>
               <th scope="col">Tên</th>
               <th scope="col">Hãng</th>
@@ -238,7 +357,7 @@ export default function AdminLaptopListPage() {
           <tbody>
             {laptops.length === 0 ? (
               <tr>
-                <td colSpan={6}>
+                <td colSpan={7}>
                   <EmptyState message="Không tìm thấy laptop phù hợp." />
                 </td>
               </tr>
@@ -249,6 +368,15 @@ export default function AdminLaptopListPage() {
 
                 return (
                   <tr key={laptop.id}>
+                    <td>
+                      <Form.Check
+                        type="checkbox"
+                        aria-label={`Chọn ${laptop.name}`}
+                        checked={selectedIds.has(laptop.id)}
+                        onChange={() => toggleSelected(laptop.id)}
+                        disabled={deleting}
+                      />
+                    </td>
                     <td>
                       <Image
                         src={laptop.image || FALLBACK_IMAGE}
@@ -335,13 +463,26 @@ export default function AdminLaptopListPage() {
       <AppPagination page={page} totalPages={totalPages} onChange={setPage} />
 
       <ConfirmModal
-        show={Boolean(laptopToDelete)}
-        title="Xác nhận xóa laptop"
-        message={`Bạn có chắc chắn muốn xóa "${laptopToDelete?.name}"?`}
-        confirmText="Xóa"
+        show={Boolean(laptopToDelete) || bulkConfirmOpen}
+        title={
+          bulkConfirmOpen
+            ? 'Xác nhận xóa nhiều laptop'
+            : 'Xác nhận xóa laptop'
+        }
+        message={
+          bulkConfirmOpen
+            ? `Bạn có chắc chắn muốn xóa ${selectedIds.size} laptop đã chọn?`
+            : `Bạn có chắc chắn muốn xóa "${laptopToDelete?.name}"?`
+        }
+        confirmText={bulkConfirmOpen ? 'Xóa đã chọn' : 'Xóa'}
         loading={deleting}
-        onCancel={() => setLaptopToDelete(null)}
-        onConfirm={handleDelete}
+        onCancel={() => {
+          setLaptopToDelete(null)
+          setBulkConfirmOpen(false)
+        }}
+        onConfirm={
+          bulkConfirmOpen ? handleBulkDelete : handleDelete
+        }
       />
     </Container>
   )

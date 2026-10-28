@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 import AdminLayout from './components/layout/AdminLayout';
 import MainLayout from './components/layout/MainLayout';
 import AdminLaptopFormPage from './pages/admin/AdminLaptopFormPage';
@@ -21,17 +22,28 @@ export default function App() {
         <Route index element={<HomePage />} />
         <Route path="laptops" element={<LaptopListPage />} />
         <Route path="laptops/:id" element={<LaptopDetailPage />} />
-        <Route path="login" element={<LoginPage />} />
+        <Route element={<ProtectedRoute guestOnly />}>
+          <Route path="login" element={<LoginPage />} />
+        </Route>
         {import.meta.env.DEV && (
           <Route path="dev/toast-demo" element={<ToastDemoPage />} />
         )}
-        <Route path="cart" element={<CartPage />} />
-        <Route path="checkout" element={<CheckoutPage />} />
-        <Route path="orders" element={<OrderListPage />} />
+        <Route element={<ProtectedRoute roles={['customer']} />}>
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+          <Route path="orders" element={<OrderListPage />} />
+        </Route>
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
-      <Route path="admin" element={<AdminLayout />}>
+      <Route
+        path="admin"
+        element={
+          <ProtectedRoute roles={['admin']}>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<Navigate to="laptops" replace />} />
         <Route path="laptops" element={<AdminLaptopPage />} />
         <Route path="laptops/new" element={<AdminLaptopFormPage />} />
